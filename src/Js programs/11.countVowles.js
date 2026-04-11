@@ -1,7 +1,8 @@
-const charsss = 'madam'
+const charsss = 'madam';
 function countVC(str) {
-  let vowels = 0, consonants = 0;
-  const vowelsVars = "aeiou";
+  let vowels = 0,
+    consonants = 0;
+  const vowelsVars = 'aeiou';
 
   str = str.toLowerCase();
 

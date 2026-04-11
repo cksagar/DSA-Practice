@@ -12,4 +12,4 @@ function removeDuplicates(arr) {
   return arr.slice(0, i + 1);
 }
 
-console.log(removeDuplicates([1,2,3,3,4,4,4,5])) 
+console.log(removeDuplicates([1, 2, 3, 3, 4, 4, 4, 5]));
