@@ -1,4 +1,7 @@
 import { Schema, model } from 'mongoose';
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const companyLocationSchema = new Schema(
   {
@@ -68,17 +71,37 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (!this.isModified('password')) {
-    return next();
+    return;
   }
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 userSchema.methods.isPasswordCorrect = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign({ _id: this._id, email: this.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN });
+};
+
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN });
+};
+
+userSchema.methods.generateTemporaryToken = function () {
+  const unHashToken  = crypto.randomBytes(32).toString('hex');
+
+  const hashToken = crypto.createHash('sha256').update(unHashToken).digest('hex');
+const tokenExpiry = Date.now() + (20 * 60 * 1000);
+
+  return {
+    hashToken,
+    unHashToken,
+    tokenExpiry,
+  };
+}
 
 const User = model('User', userSchema);
 

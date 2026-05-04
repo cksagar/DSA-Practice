@@ -36,6 +36,6 @@ app.get('/', (req, res) => {
 });
 
 // routes to handle user requests
-app.use('/api/users', userRoutes);
+app.use('/api/v1/users', userRoutes);
 
 export default app;

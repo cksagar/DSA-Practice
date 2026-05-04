@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import { ensureAuthenticated } from '../middlewares/route-access.middleware.js';
 const router = express.Router();
+import registerController from '../controllers/auth.controller.js';
 
 /**
  * @description Get all users
@@ -29,56 +30,59 @@ router.get('/', ensureAuthenticated, async (req, res) => {
   }
 });
 
-router.post('/signup', async (req, res) => {
-  try {
-    const { name, email, password } = req.body ?? {};
+router.post('/register', registerController);
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Missing required fields: name, email, password' });
-    }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+// router.post('/signup', async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body ?? {};
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+//     if (!name || !email || !password) {
+//       return res.status(400).json({ message: 'Missing required fields: name, email, password' });
+//     }
 
-    const user = await User.create({ name, email, password: hashedPassword, salt });
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ message: 'User already exists' });
+//     }
 
-    return res.status(201).json({
-      message: 'User created successfully',
-      userId: user._id,
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'Failed to create user' });
-  }
-});
+//     const salt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(password, salt);
 
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body ?? {};
+//     const user = await User.create({ name, email, password: hashedPassword, salt });
 
-    const user = await User.findOne({ email });
-    if (!user || !user.password) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+//     return res.status(201).json({
+//       message: 'User created successfully',
+//       userId: user._id,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({ message: 'Failed to create user' });
+//   }
+// });
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+// router.post('/login', async (req, res) => {
+//   try {
+//     const { email, password } = req.body ?? {};
 
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid password' });
-    }
+//     const user = await User.findOne({ email });
+//     if (!user || !user.password) {
+//       return res.status(401).json({ message: 'Invalid email or password' });
+//     }
 
-    return res.status(200).json({
-      message: 'Login successful',
-      token: jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }),
-    });
-  } catch (error) {
-    console.error('Error logging in', error);
-    return res.status(500).json({ message: 'Failed to login' });
-  }
-});
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+
+//     if (!isPasswordValid) {
+//       return res.status(401).json({ message: 'Invalid password' });
+//     }
+
+//     return res.status(200).json({
+//       message: 'Login successful',
+//       token: jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }),
+//     });
+//   } catch (error) {
+//     console.error('Error logging in', error);
+//     return res.status(500).json({ message: 'Failed to login' });
+//   }
+// });
 
 export default router;
